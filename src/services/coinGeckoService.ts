@@ -23,6 +23,8 @@ export const fetchCoinGeckoSymbols = async () => {
       image: coin.image,
     }));
   } catch (error) {
+    console.error(error);
+    // eslint-disable-next-line
     return fallBackCoinData.map((coin: any) => ({
       id: coin.id,
       symbol: coin.symbol,

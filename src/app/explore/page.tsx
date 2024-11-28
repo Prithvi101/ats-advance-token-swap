@@ -5,7 +5,7 @@ import { Token } from "@/components/ui/Inputs/CryptoInput";
 import SearchInput from "@/components/ui/Inputs/SearchInput";
 import TokenSelector from "@/components/ui/Modal/TokenSelector";
 import useGetAllSymbols from "@/hooks/useGetAllSymbol";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 function Page() {
   const [selectionPopup, setSelectionPopup] = useState<boolean>(false);

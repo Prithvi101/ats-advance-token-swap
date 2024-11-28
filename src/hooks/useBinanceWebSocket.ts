@@ -1,14 +1,6 @@
 "use client";
 
-import {
-  useState,
-  useCallback,
-  Dispatch,
-  SetStateAction,
-  useLayoutEffect,
-  useEffect,
-  useRef,
-} from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { throttle } from "lodash";
 
 // WebSocket base URL
@@ -86,7 +78,7 @@ const useBinanceWebSocket = ({
     const orderBookWs = new WebSocket(orderBookWsUrl);
 
     ws.onopen = (event) => {
-      console.log("connected to websocket", symbol);
+      console.log("connected to websocket", symbol, event);
     };
     // WebSocket event handlers
     ws.onmessage = (event) => {
@@ -95,7 +87,7 @@ const useBinanceWebSocket = ({
         // Call throttled function to update state
         throttledUpdate(data, type);
       } catch (err) {
-        console.error("Error parsing WebSocket message", err);
+        console.error("Error parsing WebSocket message", err, event);
         setError(new Error("Error parsing WebSocket message"));
       }
     };

@@ -9,7 +9,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@tanstack/react-table": "^8.20.5",
     "ethers": "5.7.2",
     "lodash": "^4.17.21",
     "next": "15.0.3",
