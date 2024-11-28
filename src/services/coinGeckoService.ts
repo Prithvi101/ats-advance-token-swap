@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { fallBackCoinData } from "@/database/Constants";
 import axios from "axios";
 
