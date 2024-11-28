@@ -26,8 +26,8 @@ function Page() {
     <div className="max-w-7xl m-auto px-8 mt-5">
       <div className="  flex  justify-center items-center flex-col-reverse sm:flex-row">
         <div className="">
-          <div className="bg-select p-2 border-deselect border-2 rounded-2xl">
-            <ListItemCard symbol={Token}></ListItemCard>
+          <div className="bg-select p-2 hover:bg-deselect border-deselect border-2 rounded-2xl">
+            <ListItemCard disableHover symbol={Token}></ListItemCard>
           </div>
         </div>
         <div className="max-w-[480px] flex-grow m-auto">
