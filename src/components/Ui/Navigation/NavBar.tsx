@@ -2,6 +2,7 @@
 import React from "react";
 import Button from "../Buttons/Button";
 import NavLink from "./NavLink";
+import { FaArrowRight } from "react-icons/fa";
 
 function NavBar() {
   return (
@@ -18,6 +19,7 @@ function NavBar() {
         <Button
           label="CONNECT WALLET"
           onClick={() => console.log("button clicked")}
+          Icon={FaArrowRight}
         ></Button>
       </div>
     </div>
