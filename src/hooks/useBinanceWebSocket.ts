@@ -2,10 +2,12 @@
 
 import {
   useState,
-  useEffect,
   useCallback,
   Dispatch,
   SetStateAction,
+  useLayoutEffect,
+  useEffect,
+  useRef,
 } from "react";
 import { throttle } from "lodash";
 
@@ -21,58 +23,87 @@ interface TickerData {
 
 interface PriceData {
   price: number; // Current price
-  change: string; // Price change percentage
+  change: number; // Price change percentage
 }
 
 interface UseBinanceWebSocketResult {
-  prices: Record<string, PriceData>;
   error: Error | null;
   reconnecting: boolean;
-  setUpdateTokens: Dispatch<SetStateAction<boolean>>;
+  orderBook?: OrderBook;
+  buyPrices: PriceData | undefined;
+  sellPrices: PriceData | undefined;
 }
+// Define types for the bids and asks data
+type OrderBook = {
+  lastUpdateId: number;
+  bids: [string, string][]; // Array of tuples where each tuple contains a price and quantity as strings
+  asks: [string, string][]; // Array of tuples where each tuple contains a price and quantity as strings
+};
 
-const useBinanceWebSocket = (symbols: string[]): UseBinanceWebSocketResult => {
-  const [prices, setPrices] = useState<Record<string, PriceData>>({});
+const useBinanceWebSocket = ({
+  buySymbol,
+  sellSymbol,
+  bookFor,
+}: {
+  buySymbol?: string;
+  sellSymbol?: string;
+  bookFor?: string;
+}): UseBinanceWebSocketResult => {
+  const [buyPrices, setBuyPrices] = useState<PriceData>();
+  const [sellPrices, setSellPrices] = useState<PriceData>();
+  const [orderBook, setOrderBook] = useState<OrderBook>();
   const [error, setError] = useState<Error | null>(null);
   const [reconnecting, setReconnecting] = useState(false);
-  const [updateTokens, setUpdateTokens] = useState(false);
-  const wsConnections: Record<string, WebSocket>[] = [];
+  const buyWS = useRef<WebSocket | null>(null);
+  const sellWS = useRef<WebSocket | null>(null);
   // Throttle function to limit updates to 1 second
-  const throttledUpdate = useCallback(
-    throttle((data: TickerData, symbol: string) => {
-      setPrices((prevPrices) => ({
-        ...prevPrices,
-        [symbol]: {
-          price: data?.c,
-          change: data?.P,
-        },
-      }));
-    }, 1000), // Throttle for 5 second
-    []
-  );
+  const throttledUpdate = throttle((data: TickerData, type: string) => {
+    // eslint-disable-next-line
+    if (type === "buy") {
+      setBuyPrices({
+        price: typeof data?.c === "string" ? parseFloat(data.c) : data.c,
+        change: typeof data?.P === "string" ? parseFloat(data.P) : data.P,
+      });
+    } else {
+      setSellPrices({
+        price: typeof data?.c === "string" ? parseFloat(data.c) : data.c,
+        change: typeof data?.P === "string" ? parseFloat(data.P) : data.P,
+      });
+    }
+  }, 1000);
 
-  const disconnectUnusedWs = () => {
-    // Flatten the array and iterate over each WebSocket connection
-    wsConnections.flatMap(Object.entries).forEach(([symbol, ws]) => {
-      // close  each unneeded WebSocket
-      if (!symbols.includes(symbol)) {
-        ws?.close?.();
-      }
-    });
-  };
+  // Throttle function to limit updates to 1 second
+  const throttledUpdateBook = throttle((data) => {
+    setOrderBook(data);
+  }, 1000); // Throttle for 5 second
 
   // Create WebSocket connection for each symbol
-  const createWebSocket = useCallback((symbol: string) => {
+  const createWebSocket = useCallback((symbol: string, type: string) => {
     const wsUrl = `${BINANCE_WS_URL}${symbol.toLowerCase()}usdt@ticker_1h`;
-    console.log(wsUrl);
-    const ws = new WebSocket(wsUrl);
+    const orderBookWsUrl = `${BINANCE_WS_URL}${symbol.toLowerCase()}usdt@depth`;
 
+    const ws = new WebSocket(wsUrl);
+    const orderBookWs = new WebSocket(orderBookWsUrl);
+
+    ws.onopen = (event) => {
+      console.log("connected to websocket", symbol);
+    };
     // WebSocket event handlers
     ws.onmessage = (event) => {
       try {
         const data: TickerData = JSON.parse(event.data);
         // Call throttled function to update state
-        throttledUpdate(data, symbol);
+        throttledUpdate(data, type);
+      } catch (err) {
+        console.error("Error parsing WebSocket message", err);
+        setError(new Error("Error parsing WebSocket message"));
+      }
+    };
+    orderBookWs.onmessage = (event) => {
+      try {
+        const data: TickerData = JSON.parse(event.data);
+        // Call throttled function to update state
+        throttledUpdateBook(data);
       } catch (err) {
         console.error("Error parsing WebSocket message", err);
         setError(new Error("Error parsing WebSocket message"));
@@ -88,7 +119,7 @@ const useBinanceWebSocket = (symbols: string[]): UseBinanceWebSocketResult => {
       // Attempt to reconnect if WebSocket is closed unexpectedly
       setReconnecting(true);
       setTimeout(() => {
-        createWebSocket(symbol);
+        createWebSocket(symbol, type);
         setReconnecting(false);
       }, 5000); // Reconnect after 5 seconds
     };
@@ -96,25 +127,74 @@ const useBinanceWebSocket = (symbols: string[]): UseBinanceWebSocketResult => {
     return ws;
   }, []);
 
-  useEffect(() => {
-    if (symbols.length === 0) return;
-    if (updateTokens) {
-      // Establish WebSocket connections for each symbol
-      symbols.forEach((symbol) => {
-        const ws = createWebSocket(symbol);
-        wsConnections.push({ [symbol]: ws });
-      });
-      setUpdateTokens(false);
-    }
-    disconnectUnusedWs();
+  const createWebSocketBook = useCallback((symbol: string) => {
+    const orderBookWsUrl = `${BINANCE_WS_URL}${symbol.toLowerCase()}usdt@depth5`;
 
-    // Cleanup all WebSocket connections when the component unmounts or symbols change
-    return () => {
-      wsConnections.forEach((ws) => ws.close?.());
+    const orderBookWs = new WebSocket(orderBookWsUrl);
+    orderBookWs.onmessage = (event) => {
+      try {
+        const data: TickerData = JSON.parse(event.data);
+        // Call throttled function to update state
+        throttledUpdateBook(data);
+      } catch (err) {
+        console.error("Error parsing WebSocket message", err);
+        setError(new Error("Error parsing WebSocket message"));
+      }
     };
-  }, [updateTokens]); // Re-run when symbols change or createWebSocket function is updated
 
-  return { prices, error, reconnecting, setUpdateTokens };
+    return orderBookWs;
+  }, []);
+
+  useEffect(() => {
+    // Close the previous WebSocket before creating a new one
+    if (buyWS.current) {
+      buyWS.current.close();
+    }
+    // Create a new WebSocket if buySymbol is defined
+    if (buySymbol) {
+      buyWS.current = createWebSocket(buySymbol, "buy");
+    }
+    return () => {
+      // Ensure the WebSocket is closed when the component unmounts
+      if (buyWS.current) {
+        buyWS.current.close();
+      }
+    };
+  }, [buySymbol]);
+
+  useEffect(() => {
+    // Close the previous WebSocket before creating a new one
+    if (sellWS.current) {
+      sellWS.current.close();
+    }
+
+    // Create a new WebSocket if buySymbol is defined
+    if (sellSymbol) {
+      sellWS.current = createWebSocket(sellSymbol, "sell");
+    }
+
+    return () => {
+      // Ensure the WebSocket is closed when the component unmounts
+      if (sellWS.current) {
+        sellWS.current.close();
+      }
+    };
+  }, [sellSymbol]);
+
+  useEffect(() => {
+    if (!bookFor) return;
+    const ws = createWebSocketBook(bookFor);
+
+    return () => ws?.close();
+  }, [bookFor]);
+
+  return {
+    buyPrices,
+    sellPrices,
+    error,
+    orderBook,
+    reconnecting,
+  };
 };
 
 export default useBinanceWebSocket;

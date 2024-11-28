@@ -2,12 +2,10 @@
 import React, { useState, useEffect } from "react";
 import CryptoInput, { Token } from "../Inputs/CryptoInput";
 import useGetAllSymbols from "@/hooks/useGetAllSymbol";
-import SearchInput from "../Inputs/SearchInput";
 import ListItemCard from "./ListItemCard";
 import Button from "../Buttons/Button";
 import useBinanceWebSocket from "@/hooks/useBinanceWebSocket"; // Import the WebSocket hook
 import { FaArrowDown } from "react-icons/fa";
-import { RxCross1 } from "react-icons/rx";
 import TokenSelector from "../Modal/TokenSelector";
 import MultiAlert from "../Modal/MultiAlert";
 
@@ -15,20 +13,35 @@ function SwapCard() {
   const [buy, setBuy] = useState<number>(0);
   const [sell, setSell] = useState<number>(0);
   const { symbols } = useGetAllSymbols();
-  const [buyToken, setBuyToken] = useState<Token | undefined>(undefined);
-  const [sellToken, setSellToken] = useState<Token | undefined>(undefined);
+  const [transactionComplete, setTransactionComplete] = useState(false); // State to manage transaction status
+  const [buyToken, setBuyToken] = useState<Token>({
+    id: "bitcoin",
+    symbol: "btc",
+    name: "Bitcoin",
+    image:
+      "https://coin-images.coingecko.com/coins/images/1/large/bitcoin.png?1696501400",
+  });
+  const [sellToken, setSellToken] = useState<Token>({
+    id: "ethereum",
+    symbol: "eth",
+    name: "Ethereum",
+    image:
+      "https://coin-images.coingecko.com/coins/images/279/large/ethereum.png?1696501628",
+  });
   const [selectionPopup, setSelectionPopup] = useState<boolean>(false);
   const [fees, setFees] = useState<number>(0);
   const [showAlert, setShowAlert] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
+  const [transactionProcessing, setTransactionProcessiing] =
+    useState<boolean>(false);
   const [currentSelection, setCurrentSelection] = useState<"buy" | "sell">(
     "buy"
   );
 
-  const { prices, setUpdateTokens } = useBinanceWebSocket([
-    ...(buyToken ? [buyToken.symbol] : []),
-    ...(sellToken ? [sellToken.symbol] : []),
-  ]);
+  const { buyPrices, sellPrices } = useBinanceWebSocket({
+    sellSymbol: sellToken.symbol,
+    buySymbol: buyToken.symbol,
+  });
   const handleSwitch = () => {
     setBuy((prevBuy) => {
       setSell(prevBuy);
@@ -48,36 +61,26 @@ function SwapCard() {
   useEffect(() => {
     if (currentSelection === "sell" || (sell > 0 && buy == 0)) {
       // Check if sellToken and buyToken are defined and prices are available
-      if (
-        sellToken &&
-        buyToken &&
-        prices[sellToken.symbol] &&
-        prices[buyToken.symbol]
-      ) {
-        const totalAmount = prices[sellToken.symbol]?.price * sell;
+      if (sellToken && buyToken && sellPrices && buyPrices) {
+        const totalAmount = sellPrices?.price * sell;
 
-        const buyableSellToken = totalAmount / prices[buyToken.symbol]?.price;
+        const buyableSellToken = totalAmount / buyPrices?.price;
 
         setBuy(parseFloat(calculateFees(buyableSellToken).toFixed(2)));
         setCurrentSelection("sell");
       }
     } else if (currentSelection === "buy" || (buy > 0 && sell == 0)) {
       // Check if sellToken and buyToken are defined and prices are available
-      if (
-        sellToken &&
-        buyToken &&
-        prices[sellToken.symbol] &&
-        prices[buyToken.symbol]
-      ) {
-        const amountRequired =
-          (prices[buyToken.symbol]?.price * buy) /
-          prices[sellToken.symbol]?.price;
+      if (sellToken && buyToken && sellPrices && buyPrices) {
+        const amountRequired = (buyPrices?.price * buy) / sellPrices?.price;
         setSell(parseFloat(calculateFees(amountRequired).toFixed(2)));
         setCurrentSelection("buy");
       }
     }
-  }, [sell, prices, buy, sellToken, buyToken]);
-
+  }, [sell, buy, sellToken, buyToken]);
+  useEffect(() => {
+    if (!showAlert) setTransactionComplete(false);
+  }, [showAlert]);
   const handleSelectToken = (symbol: Token) => {
     console.log(symbol);
     if (currentSelection === "buy") {
@@ -85,10 +88,17 @@ function SwapCard() {
     } else {
       setSellToken(symbol);
     }
-    setUpdateTokens(true);
     setSelectionPopup(false);
   };
-
+  const handleConfirm = () => {
+    // Simulate transaction success
+    setTransactionComplete(true);
+    setTransactionProcessiing(true);
+    // Optionally hide the alert after a delay
+    setTimeout(() => {
+      setTransactionProcessiing(false);
+    }, 2000);
+  };
   const handleSwap = () => {
     if (!buyToken || !sellToken) {
       setError("Please Select Token");
@@ -100,7 +110,7 @@ function SwapCard() {
     }
     // Trigger the swap action, including the use of the price data
     setShowAlert(true);
-    const price = prices[buyToken?.symbol || ""]?.price;
+    const price = buyPrices?.price;
     if (price) {
       const calculatedAmount = buy * price;
       console.log(`Calculated amount: ${calculatedAmount}`);
@@ -117,7 +127,7 @@ function SwapCard() {
   return (
     <div
       className={
-        "bg-slate-600/10 flex-col h-auto max-w-[480px]  rounded-3xl flex justify-start p-4 gap-2 " +
+        "bg-slate-600/10 flex-col h-auto max-w-[480px] animate-slide-up rounded-3xl flex justify-start p-4 gap-2 " +
         (error ? "border-2 border-red-500/50 rounded-3xl p-2" : "")
       }
     >
@@ -126,10 +136,8 @@ function SwapCard() {
         <CryptoInput
           value={sell}
           label={"Sell"}
-          currentPrice={
-            sellToken?.symbol ? prices?.[sellToken?.symbol]?.price : 0
-          }
-          change={sellToken?.symbol ? prices?.[sellToken?.symbol]?.change : 0}
+          currentPrice={sellPrices?.price ?? 0}
+          change={sellPrices?.change ?? 0}
           token={sellToken}
           setValue={setSell}
           setCurrentSelection={() => {
@@ -147,9 +155,7 @@ function SwapCard() {
         <CryptoInput
           value={buy}
           label={"Buy"}
-          currentPrice={
-            buyToken?.symbol ? prices?.[buyToken?.symbol]?.price : 0
-          }
+          currentPrice={buyPrices?.price ?? 0}
           setValue={setBuy}
           setCurrentSelection={() => {
             setCurrentSelection("buy");
@@ -157,7 +163,7 @@ function SwapCard() {
               setSelectionPopup(true);
             }
           }}
-          change={buyToken?.symbol ? prices?.[buyToken?.symbol]?.change : 0}
+          change={buyPrices?.change || 0}
           token={buyToken}
           onClickSymbol={() => {
             setCurrentSelection("buy");
@@ -184,33 +190,64 @@ function SwapCard() {
 
       <MultiAlert show={showAlert} setShow={setShowAlert} label="Order Details">
         <div className="px-4">
-          <div className=" flex  justify-between items-center">
-            <ListItemCard symbol={sellToken}></ListItemCard>
-            <div className="text-sm font-bold flex flex-col items-end">
-              <p className=" text-white/25">Expected Tokens</p>
-              <p>{sell}</p>
+          {!transactionComplete ? (
+            <>
+              <div className="flex justify-between items-center">
+                <ListItemCard symbol={sellToken}></ListItemCard>
+                <div className="text-sm font-bold flex flex-col items-end">
+                  <p className="text-white/25">Expected Tokens</p>
+                  <p>{sell}</p>
+                </div>
+              </div>
+              <div className="flex justify-between items-center">
+                <ListItemCard symbol={buyToken}></ListItemCard>
+                <div className="text-sm font-bold flex flex-col items-end">
+                  <p className="text-white/25">Expected Tokens</p>
+                  <p>{buy}</p>
+                </div>
+              </div>
+              <div className="flex justify-between font-semibold text-sm border-t-2 border-white/25 pt-4 mt-2">
+                <p className="text-white/25">Amount Before Fees</p>
+                <p>{buy && buy?.toFixed(2)} $</p>
+              </div>
+              <div className="flex justify-between font-semibold text-sm">
+                <p className="text-white/25">Amount With Fees</p>
+                <p>{(buy + fees)?.toFixed(2)} $</p>
+              </div>
+              <div className="flex gap-2 justify-between text-sm font-bold text-white/25">
+                <p>Max Slippage</p>
+                <p className={fees > 0 ? "text-white" : ""}>1%</p>
+              </div>
+              <Button
+                onClick={handleConfirm}
+                label="CONFIRM"
+                className="justify-center mt-4"
+              />
+            </>
+          ) : transactionProcessing ? (
+            <div className="flex items-center justify-center p-20">
+              <div className="lds-circle flex items-center justify-center animate-bounce ">
+                <div className="text-2xl font-bold">B</div>
+              </div>
             </div>
-          </div>
-          <div className=" flex  justify-between items-center">
-            <ListItemCard symbol={buyToken}></ListItemCard>
-            <div className="text-sm font-bold flex flex-col items-end">
-              <p className=" text-white/25">Expected Tokens</p>
-              <p>{buy}</p>
+          ) : (
+            <div className="text-center">
+              <p className="text-xl font-bold text-green-500">
+                Transaction Successful
+              </p>
+              <p className="text-sm text-white/50 mt-2">
+                Your transaction has been successfully processed.
+              </p>
+              <Button
+                onClick={() => {
+                  setTransactionComplete(false);
+                  setShowAlert(false);
+                }}
+                label="CLOSE"
+                className="justify-center mt-4"
+              />
             </div>
-          </div>
-          <div className="flex justify-between font-semibold text-sm border-t-2 border-white/25 pt-4 mt-2">
-            <p className=" text-white/25">Amount Before Fees</p>
-            <p> {buy.toFixed(2)} $</p>
-          </div>
-          <div className="flex justify-between font-semibold text-sm">
-            <p className=" text-white/25">Amount With Fees</p>
-            <p>{(buy + fees).toFixed(2)} $</p>
-          </div>
-          <div className="flex gap-2 justify-between  text-sm font-bold text-white/25 ">
-            <p>Max Slipage </p>
-            <p className={fees > 0 ? "text-white" : ""}>1%</p>
-          </div>
-          <Button label="CONFIRM" className="justify-center mt-4"></Button>
+          )}
         </div>
       </MultiAlert>
 

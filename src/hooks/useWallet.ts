@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 
 interface WalletState {
@@ -28,6 +28,7 @@ export const useWallet = () => {
         provider,
         error: null,
       });
+      // eslint-disable-next-line
     } catch (err: any) {
       setWallet((prev) => ({
         ...prev,
@@ -36,9 +37,49 @@ export const useWallet = () => {
     }
   };
 
-  const disconnectWallet = () => {
+  const disconnectWallet = async () => {
+    console.log("wallet disconnected");
+    await window.ethereum.request({
+      method: "wallet_revokePermissions",
+      params: [
+        {
+          eth_accounts: {},
+        },
+      ],
+    });
     setWallet({ walletAddress: null, provider: null, error: null });
+    // Inform the user to manually disconnect if necessary
   };
+
+  // Sync state with MetaMask events
+  useEffect(() => {
+    const handleAccountsChanged = (accounts: string[]) => {
+      if (accounts.length === 0) {
+        disconnectWallet();
+      } else {
+        setWallet((prev) => ({ ...prev, walletAddress: accounts[0] }));
+      }
+    };
+
+    const handleDisconnect = () => {
+      disconnectWallet();
+    };
+
+    if (window.ethereum) {
+      window.ethereum.on("accountsChanged", handleAccountsChanged);
+      window.ethereum.on("disconnect", handleDisconnect);
+    }
+
+    return () => {
+      if (window.ethereum) {
+        window.ethereum.removeListener(
+          "accountsChanged",
+          handleAccountsChanged
+        );
+        window.ethereum.removeListener("disconnect", handleDisconnect);
+      }
+    };
+  }, []);
 
   return { wallet, connectWallet, disconnectWallet };
 };

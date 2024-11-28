@@ -1,3 +1,4 @@
+import { fallBackCoinData } from "@/database/Constants";
 import axios from "axios";
 
 export const fetchCoinGeckoSymbols = async () => {
@@ -14,7 +15,7 @@ export const fetchCoinGeckoSymbols = async () => {
         },
       }
     );
-
+    // eslint-disable-next-line
     return response.data.map((coin: any) => ({
       id: coin.id,
       symbol: coin.symbol,
@@ -22,6 +23,11 @@ export const fetchCoinGeckoSymbols = async () => {
       image: coin.image,
     }));
   } catch (error) {
-    throw new Error("Failed to fetch symbols from CoinGecko");
+    return fallBackCoinData.map((coin: any) => ({
+      id: coin.id,
+      symbol: coin.symbol,
+      name: coin.name,
+      image: coin.image,
+    }));
   }
 };

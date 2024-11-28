@@ -9,10 +9,10 @@ interface TokenSelectorProps {
   selectionPopup: boolean;
   setSelectionPopup: Dispatch<SetStateAction<boolean>>;
   symbols: Token[];
-  currentSelection: string;
-  sellToken: Token | undefined;
-  buyToken: Token | undefined;
-  handleSelectToken: () => void;
+  currentSelection?: string;
+  sellToken?: Token | undefined;
+  buyToken?: Token | undefined;
+  handleSelectToken: (symbol: Token) => void;
 }
 
 function TokenSelector({
@@ -29,7 +29,7 @@ function TokenSelector({
   // Filter symbols based on search query
   const filteredSymbols = symbols?.filter?.(
     (symbol) =>
-      symbol.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+      symbol?.name?.toLowerCase().includes(searchQuery.toLowerCase()) &&
       (currentSelection == "buy" //checking if opposite symbol is already selected if yes then remove it
         ? symbol.symbol.toLocaleLowerCase() != sellToken?.symbol
         : symbol.symbol.toLocaleLowerCase() != buyToken?.symbol)

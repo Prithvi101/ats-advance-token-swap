@@ -1,3 +1,4 @@
+"use client";
 import { fetchCoinGeckoSymbols } from "@/services/coinGeckoService";
 import { useEffect, useState } from "react";
 
@@ -18,6 +19,7 @@ const useGetAllSymbols = () => {
         const result = await fetchCoinGeckoSymbols();
         setSymbols(result);
       } catch (err) {
+        console.error(err);
         setError("Failed to fetch CoinGecko symbols");
       }
     };

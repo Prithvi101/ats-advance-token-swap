@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import React, { Dispatch, SetStateAction, useEffect } from "react";
-import { IoIosArrowDown } from "react-icons/io";
+import { TiArrowSortedDown } from "react-icons/ti";
 
 interface CryptoInputParams {
   value?: number;
@@ -30,8 +30,8 @@ const CryptoInput = ({
   change,
   label,
 }: CryptoInputParams) => {
-  const handleValueChange = (e) => {
-    setValue(e.target.value);
+  const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setValue(parseInt(e.target.value));
   };
   useEffect(() => {}, [currentPrice]);
   return (
@@ -49,7 +49,7 @@ const CryptoInput = ({
           <div className="flex items-center mt-2">
             <input
               type="number"
-              value={value || ""}
+              value={isNaN(value ?? 0) ? "" : value}
               onChange={handleValueChange}
               className=" bg-transparent w-full text-2xl font-bold outline-none"
               placeholder="0"
@@ -59,7 +59,7 @@ const CryptoInput = ({
         <div className="flex items-center   justify-center flex-col ">
           <div
             onClick={onClickSymbol}
-            className=" bg-select border-slate-600/50 border-2 whitespace-nowrap px-2 relative py-1 cursor-pointer  font-extrabold rounded-full flex items-center gap-1"
+            className=" bg-select border-slate-600/50 border-2 whitespace-nowrap px-2 relative py-1 cursor-pointer  font-extrabold  rounded-full flex items-center gap-1"
           >
             {token?.image ? (
               <>
@@ -68,15 +68,13 @@ const CryptoInput = ({
                   width={30}
                   height={30}
                   alt={token?.symbol}
-                  className="h-full rounded-full"
                 ></Image>
                 <p className="">{token?.symbol?.toLocaleUpperCase()}</p>
+                <TiArrowSortedDown className="text-lg  w-12" />
               </>
             ) : (
               <p>Select Token</p>
             )}
-
-            <IoIosArrowDown />
           </div>
           {/* Example rate conversion */}
         </div>
@@ -91,7 +89,7 @@ const CryptoInput = ({
                 "text-sm " + (change > 0 ? "text-green-500" : "text-red-500")
               }
             >
-              {parseFloat(change)?.toFixed(2) + "%"}
+              {change?.toFixed(2) + "%"}
             </p>
           </div>
         )}

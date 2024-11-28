@@ -1,3 +1,4 @@
+"use client";
 import React, { Dispatch, ReactNode, SetStateAction } from "react";
 import { RxCross1 } from "react-icons/rx";
 

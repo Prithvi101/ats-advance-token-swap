@@ -1,10 +1,72 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+html {
+  font-size: clamp(0.8rem, 1.8vw, 1.1rem);
+}
+/* Globally disable number input spin buttons */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none; /* Removes the spin buttons in WebKit browsers (e.g., Chrome, Safari) */
+  margin: 0; /* Optional: removes any margin issues */
+}
 
+input[type="number"] {
+  -moz-appearance: textfield; /* Removes the spin buttons in Firefox */
+}
+/* Global Custom Scrollbar Styles */
+.scrollbar-custom::-webkit-scrollbar {
+  width: 8px; /* Adjust width of the scrollbar */
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb {
+  background-color: #333; /* Black color for the scrollbar thumb */
+  border-radius: 50px; /* Rounded pill shape */
+}
+
+.scrollbar-custom::-webkit-scrollbar-track {
+  background: #222; /* Dark track background */
+  border-radius: 50px;
+}
 :root {
   --background: #ffffff;
   --foreground: #171717;
+}
+
+.lds-circle,
+.lds-circle div {
+  box-sizing: border-box;
+}
+.lds-circle {
+  display: inline-block;
+  transform: translateZ(1px);
+}
+.lds-circle > div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  margin: 8px;
+  background: #f7931a;
+  border-radius: 50%;
+  animation: lds-circle 2.4s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+}
+@keyframes lds-circle {
+  0%,
+  100% {
+    animation-timing-function: cubic-bezier(0.5, 0, 1, 0.5);
+  }
+  0% {
+    transform: rotateY(0deg);
+  }
+  50% {
+    transform: rotateY(1800deg);
+    animation-timing-function: cubic-bezier(0, 0.5, 0.5, 1);
+  }
+  100% {
+    transform: rotateY(3600deg);
+  }
 }
 
 @media (prefers-color-scheme: dark) {
