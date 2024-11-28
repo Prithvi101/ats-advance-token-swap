@@ -1,9 +1,9 @@
 "use client";
 import OrderBook from "@/components/orderbook/Orderbook";
-import ListItemCard from "@/components/Ui/Cards/ListItemCard";
-import { Token } from "@/components/Ui/Inputs/CryptoInput";
-import SearchInput from "@/components/Ui/Inputs/SearchInput";
-import TokenSelector from "@/components/Ui/Modal/TokenSelector";
+import ListItemCard from "@/components/ui/Cards/ListItemCard";
+import { Token } from "@/components/ui/Inputs/CryptoInput";
+import SearchInput from "@/components/ui/Inputs/SearchInput";
+import TokenSelector from "@/components/ui/Modal/TokenSelector";
 import useGetAllSymbols from "@/hooks/useGetAllSymbol";
 import React, { useState } from "react";
 
