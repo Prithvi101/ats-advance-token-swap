@@ -1,14 +1,27 @@
 import React from "react";
-import { FaArrowRight } from "react-icons/fa";
+import { IconType } from "react-icons";
 
-function Button({ label, onClick }: { label: string; onClick: () => void }) {
+function Button({
+  label,
+  onClick,
+  Icon,
+  className,
+}: {
+  label: string;
+  onClick: () => void;
+  Icon?: IconType;
+  className?: string;
+}) {
   return (
     <div
       onClick={onClick}
-      className="bg-primary text-primaryDark rounded-full px-4 py-2  flex items-center gap-3 cursor-pointer hover:scale-105 transition-transform ease-in-out duration-100"
+      className={
+        "bg-primary text-primaryDark rounded-full px-4 py-2  flex items-center gap-3 cursor-pointer  transition-transform ease-in-out duration-100 " +
+        className
+      }
     >
       {label}
-      <FaArrowRight />
+      {Icon && <Icon />}
     </div>
   );
 }
