@@ -3,9 +3,9 @@ import SwapCard from "@/components/ui/Cards/SwapCard";
 
 export default function Home() {
   return (
-    <div className=" items-start justify-items-center   min-h-screen p-8 pb-20 gap-16 sm:p-20  font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-start  sm:items-start ">
-        <h2 className="text-[3rem] max-w-[480px] text-center animate-slide-up font-semibold">
+    <div className=" items-start justify-items-center px-8  sm:px-auto   gap-16  h-[calc(100vh-7rem)]   font-[family-name:var(--font-geist-sans)]">
+      <main className="flex flex-col gap-8 mt-4  row-start-2 justify-center items-center  sm:items-center  ">
+        <h2 className="text-[2rem] max-w-[480px] text-center animate-slide-up font-semibold">
           Swap Anytime AnyWhere
         </h2>
         <SwapCard></SwapCard>

@@ -9,14 +9,14 @@ import Image from "next/image";
 import { MdToken } from "react-icons/md";
 
 function NavBar() {
-  const { wallet, connectWallet, disconnectWallet } = useWallet();
+  const { error, wallet, connectWallet, disconnectWallet } = useWallet();
   useEffect(() => {
-    console.log(wallet);
-  }, [wallet]);
+    console.log(error);
+  }, [error]);
   return (
-    <div className=" w-full h-24 bg-primaryDark/50 flex items-center justify-between px-20">
+    <div className=" w-full h-24 sm:h-16 bg-primaryDark/50 flex items-center justify-between px-8  sm:px-20">
       {/* Right */}
-      <div className=" flex items-center justify-center sm:justify-start w-full">
+      <div className=" flex items-center justify-start sm:justify-start w-full">
         <MdToken className="text-4xl hover:text-primary cursor-pointer"></MdToken>
         <NavLink
           label="Swap"
@@ -55,13 +55,19 @@ function NavBar() {
               />
             </div>
           </div>
-        ) : (
+        ) : !error ? (
           <Button
             label={"CONNECT WALLET"}
             onClick={() => connectWallet()}
             Icon={FaArrowRight}
-            className="text-sm"
+            className="sm:text-sm whitespace-nowrap text-[0.5rem]"
           ></Button>
+        ) : (
+          <a href="https://chromewebstore.google.com/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn?hl=en&pli=1">
+            <div className="bg-red-500 rounded-3xl text-select px-4 font-bold py-2">
+              {wallet?.error}
+            </div>
+          </a>
         )}
       </div>
     </div>

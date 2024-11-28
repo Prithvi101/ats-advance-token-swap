@@ -127,7 +127,7 @@ function SwapCard() {
   return (
     <div
       className={
-        "bg-slate-600/10 flex-col h-auto max-w-[480px] animate-slide-up rounded-3xl flex justify-start p-4 gap-2 " +
+        "bg-slate-600/10 flex-col h-auto max-w-[480px] m-auto animate-slide-up rounded-3xl flex justify-start p-4 gap-2 " +
         (error ? "border-2 border-red-500/50 rounded-3xl p-2" : "")
       }
     >

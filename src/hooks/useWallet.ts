@@ -13,9 +13,10 @@ export const useWallet = () => {
     provider: null,
     error: null,
   });
-
+  const [error, setError] = useState<boolean>(false);
   const connectWallet = async () => {
     if (typeof window.ethereum === "undefined") {
+      setError(true);
       setWallet((prev) => ({ ...prev, error: "MetaMask is not installed." }));
       return;
     }
@@ -28,8 +29,10 @@ export const useWallet = () => {
         provider,
         error: null,
       });
+      setError(false);
       // eslint-disable-next-line
     } catch (err: any) {
+      setError(true);
       setWallet((prev) => ({
         ...prev,
         error: err.message || "Failed to connect wallet.",
@@ -81,5 +84,5 @@ export const useWallet = () => {
     };
   }, []);
 
-  return { wallet, connectWallet, disconnectWallet };
+  return { error, wallet, connectWallet, disconnectWallet };
 };
