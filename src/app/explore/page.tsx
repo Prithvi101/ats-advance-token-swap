@@ -24,8 +24,15 @@ function Page() {
 
   return (
     <div className="max-w-7xl m-auto px-8 mt-5">
-      <div className="max-w-[480px] m-auto">
-        <SearchInput onClick={() => setSelectionPopup(true)}></SearchInput>
+      <div className="  flex  justify-center items-center flex-col-reverse sm:flex-row">
+        <div className="">
+          <div className="bg-select p-2 border-deselect border-2 rounded-2xl">
+            <ListItemCard symbol={Token}></ListItemCard>
+          </div>
+        </div>
+        <div className="max-w-[480px] flex-grow m-auto">
+          <SearchInput onClick={() => setSelectionPopup(true)}></SearchInput>
+        </div>
       </div>
       {/* Popup Modal */}
       <TokenSelector
@@ -34,11 +41,7 @@ function Page() {
         symbols={symbols}
         handleSelectToken={handleSelectToken}
       ></TokenSelector>
-      <div className="flex items-center justify-center sm:justify-start">
-        <div className="bg-select p-2 border-deselect border-2 rounded-2xl">
-          <ListItemCard symbol={Token}></ListItemCard>
-        </div>
-      </div>
+
       <OrderBook symbol={Token?.symbol}></OrderBook>
 
       {/* Bokeh Effect for bacground */}
