@@ -100,7 +100,7 @@ const CryptoInput = ({
             "flex items-center gap-2 w-16 " + (loading ? "skeleton" : "")
           }
         >
-          {change != 0 && (
+          {change != 0 && change != undefined && (
             <>
               <p className="font-bold">1H</p>
               <p
