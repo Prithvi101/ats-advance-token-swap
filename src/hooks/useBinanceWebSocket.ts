@@ -20,7 +20,7 @@ interface PriceData {
 
 interface UseBinanceWebSocketResult {
   error: Error | null;
-  reconnecting: boolean;
+  loading: boolean;
   orderBook?: OrderBook;
   buyPrices: PriceData | undefined;
   sellPrices: PriceData | undefined;
@@ -45,7 +45,7 @@ const useBinanceWebSocket = ({
   const [sellPrices, setSellPrices] = useState<PriceData>();
   const [orderBook, setOrderBook] = useState<OrderBook>();
   const [error, setError] = useState<Error | null>(null);
-  const [reconnecting, setReconnecting] = useState(false);
+  const [loading, setLoading] = useState(false);
   const buyWS = useRef<WebSocket | null>(null);
   const sellWS = useRef<WebSocket | null>(null);
   // Throttle function to limit updates to 1 second
@@ -62,6 +62,7 @@ const useBinanceWebSocket = ({
         change: typeof data?.P === "string" ? parseFloat(data.P) : data.P,
       });
     }
+    setLoading(false);
   }, 1000);
 
   // Throttle function to limit updates to 1 second
@@ -109,10 +110,10 @@ const useBinanceWebSocket = ({
 
     ws.onclose = () => {
       // Attempt to reconnect if WebSocket is closed unexpectedly
-      setReconnecting(true);
+      setLoading(true);
       setTimeout(() => {
         createWebSocket(symbol, type);
-        setReconnecting(false);
+        setLoading(false);
       }, 5000); // Reconnect after 5 seconds
     };
 
@@ -139,6 +140,7 @@ const useBinanceWebSocket = ({
 
   useEffect(() => {
     // Close the previous WebSocket before creating a new one
+    setLoading(true);
     if (buyWS.current) {
       buyWS.current.close();
     }
@@ -155,6 +157,7 @@ const useBinanceWebSocket = ({
   }, [buySymbol]);
 
   useEffect(() => {
+    setLoading(true);
     // Close the previous WebSocket before creating a new one
     if (sellWS.current) {
       sellWS.current.close();
@@ -185,7 +188,7 @@ const useBinanceWebSocket = ({
     sellPrices,
     error,
     orderBook,
-    reconnecting,
+    loading,
   };
 };
 

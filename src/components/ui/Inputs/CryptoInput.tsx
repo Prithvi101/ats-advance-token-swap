@@ -12,6 +12,7 @@ interface CryptoInputParams {
   currentPrice: number;
   label: string;
   change?: number;
+  loading?: boolean;
 }
 export interface Token {
   id?: string;
@@ -29,6 +30,7 @@ const CryptoInput = ({
   currentPrice,
   change,
   label,
+  loading,
 }: CryptoInputParams) => {
   const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setValue(parseInt(e.target.value));
@@ -79,20 +81,38 @@ const CryptoInput = ({
           {/* Example rate conversion */}
         </div>
       </div>
-      <div className="mt-1 text-sm text-gray-400 flex justify-between">
-        ${value && currentPrice ? (value * currentPrice).toFixed(2) : ""}{" "}
-        {change && (
-          <div className="flex items-center gap-2 ">
-            <p className="font-bold">1H</p>
-            <p
-              className={
-                "text-sm " + (change > 0 ? "text-green-500" : "text-red-500")
-              }
-            >
-              {change?.toFixed(2) + "%"}
-            </p>
-          </div>
-        )}
+      <div
+        className={"mt-1 text-sm text-gray-400 flex justify-between min-h-4"}
+      >
+        <p className={" min-h-4 min-w-9 " + (loading ? "skeleton" : "")}>
+          {currentPrice
+            ? `${
+                value === 0
+                  ? `$${currentPrice}`
+                  : value && currentPrice
+                  ? `$${(value * currentPrice).toFixed(2)}`
+                  : ""
+              }`
+            : ""}
+        </p>
+        <div
+          className={
+            "flex items-center gap-2 w-16 " + (loading ? "skeleton" : "")
+          }
+        >
+          {change != 0 && (
+            <>
+              <p className="font-bold">1H</p>
+              <p
+                className={
+                  "text-sm " + (change > 0 ? "text-green-500" : "text-red-500")
+                }
+              >
+                {change?.toFixed(2) + "%"}
+              </p>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

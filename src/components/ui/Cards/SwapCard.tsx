@@ -38,9 +38,11 @@ function SwapCard() {
     "buy"
   );
 
-  const { buyPrices, sellPrices } = useBinanceWebSocket({
-    sellSymbol: sellToken.symbol,
+  const { buyPrices, loading: buyLoading } = useBinanceWebSocket({
     buySymbol: buyToken.symbol,
+  });
+  const { sellPrices, loading: sellLoading } = useBinanceWebSocket({
+    sellSymbol: sellToken.symbol,
   });
   const handleSwitch = () => {
     setBuy((prevBuy) => {
@@ -136,6 +138,7 @@ function SwapCard() {
         <CryptoInput
           value={sell}
           label={"Sell"}
+          loading={sellLoading}
           currentPrice={sellPrices?.price ?? 0}
           change={sellPrices?.change ?? 0}
           token={sellToken}
@@ -155,6 +158,7 @@ function SwapCard() {
         <CryptoInput
           value={buy}
           label={"Buy"}
+          loading={buyLoading}
           currentPrice={buyPrices?.price ?? 0}
           setValue={setBuy}
           setCurrentSelection={() => {
