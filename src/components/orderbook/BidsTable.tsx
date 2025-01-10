@@ -9,7 +9,8 @@ interface Bid {
 
 interface BidsTableProps {
   bids: Bid[];
-  label: string;
+  label?: string;
+  showHead?: boolean;
   previousBids: Bid[];
   getTrend: (
     price: string,
@@ -23,53 +24,56 @@ const BidsTable: React.FC<BidsTableProps> = ({
   previousBids,
   label,
   getTrend,
+  showHead,
 }) => {
   return (
-    <div className="w-full md:w-1/2">
-      <h3
-        className={
-          "text-2xl font-semibold  mb-4 text-center " +
-          (label === "Asks" ? "text-red-500/80 " : " text-green-600/80")
-        }
-      >
-        {label}
-      </h3>
-      <div className="overflow-hidden rounded-lg shadow-lg border border-deselect">
+    <div className="w-full ">
+      <h3 className={"text-2xl font-semibold  text-center "}>{label}</h3>
+      <div className="overflow-hidden rounded-lg shadow-lg  ">
         <table className="min-w-full divide-y divide-select text-sm">
-          <thead className="bg-deselect text-white font-bold">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs   uppercase tracking-wider">
-                Price
-              </th>
-              <th className="px-6 py-3 text-left text-xs   uppercase tracking-wider">
-                Quantity
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-deselect bg-select text-white/60 font-bold">
+          {showHead && (
+            <thead className="bg-black/60 text-white font-bold">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs   uppercase tracking-wider">
+                  Price
+                </th>
+                <th className="px-6 py-3 text-left text-xs   uppercase tracking-wider">
+                  Quantity
+                </th>
+              </tr>
+            </thead>
+          )}
+          <tbody className="divide-y divide-deselect/75 bg-select/75 text-white/60 font-bold">
             {bids.length > 0 ? (
               bids.map((bid, index) => (
                 <tr
                   key={bid.price + index}
-                  className="hover:bg-deselect cursor-pointer transition ease-in-out duration-200"
+                  className="hover:bg-deselect/75 cursor-pointer transition ease-in-out duration-200"
                 >
-                  <td className="px-6 py-4 whitespace-nowrap flex items-center">
-                    <span className=" font-medium">
+                  <td className="px-6 py-2 whitespace-nowrap flex items-center font-bold">
+                    <div className=" font-bold">
                       $ {parseFloat(bid.price).toFixed(4)}
-                    </span>
-                    {getTrend(bid.price, previousBids, index) === "up" ? (
-                      <span className="text-green-500 ml-2 font-bold">
-                        {<FaArrowUp />}
-                      </span>
-                    ) : getTrend(bid.price, previousBids, index) === "down" ? (
-                      <span className="text-red-500 ml-2 font-bold">
-                        {" "}
-                        {<FaArrowDown />}
-                      </span>
-                    ) : null}
+                    </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap  font-medium">
-                    {parseFloat(bid.quantity).toFixed(4)}
+                  <td className="px-6 py-2 whitespace-nowrap  font-medium">
+                    {getTrend(bid.price, previousBids, index) === "up" ? (
+                      <div className="flex relative w-full h-full text-green-500">
+                        {parseFloat(bid.quantity).toFixed(4)}
+
+                        <div className="text-green-500 ml-2 font-bold">
+                          {<FaArrowUp />}
+                        </div>
+                      </div>
+                    ) : getTrend(bid.price, previousBids, index) === "down" ? (
+                      <div className="flex relative w-full h-full text-red-500">
+                        {parseFloat(bid.quantity).toFixed(4)}
+
+                        <span className="text-red-500 ml-2 font-bold">
+                          {" "}
+                          {<FaArrowDown />}
+                        </span>
+                      </div>
+                    ) : null}
                   </td>
                 </tr>
               ))

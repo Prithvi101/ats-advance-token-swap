@@ -18,10 +18,14 @@ const OrderBook: React.FC<OrderBookProps> = ({ symbol = "btc" }) => {
   const [asks, setAsks] = useState<OrderBookEntry[]>([]);
   const [previousBids, setPreviousBids] = useState<OrderBookEntry[]>([]);
   const [previousAsks, setPreviousAsks] = useState<OrderBookEntry[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // Assuming the hook returns an object with `orderBook` containing bids and asks
-  const { orderBook } = useBinanceWebSocket({ bookFor: symbol });
+  const { orderBook } = useBinanceWebSocket({
+    bookFor: symbol,
+  });
+  const { buyPrices } = useBinanceWebSocket({
+    buySymbol: symbol,
+  });
 
   useEffect(() => {
     if (orderBook) {
@@ -31,18 +35,17 @@ const OrderBook: React.FC<OrderBookProps> = ({ symbol = "btc" }) => {
 
       // Update the current state with parsed data
       setBids(
-        orderBook.bids.map(([price, quantity]: [string, string]) => ({
+        orderBook.bids?.map?.(([price, quantity]: [string, string]) => ({
           price,
           quantity,
         }))
       );
       setAsks(
-        orderBook.asks.map(([price, quantity]: [string, string]) => ({
+        orderBook.asks?.map?.(([price, quantity]: [string, string]) => ({
           price,
           quantity,
         }))
       );
-      setIsLoading(false); // Data loaded
     }
   }, [orderBook]); // Added `bids` and `asks` to dependency array
 
@@ -57,30 +60,30 @@ const OrderBook: React.FC<OrderBookProps> = ({ symbol = "btc" }) => {
       : "down";
   };
 
-  if (isLoading) {
-    return (
-      <div className="p-6 text-center mt-16 ">
-        <div className="lds-circle flex items-center justify-center animate-bounce ">
-          <div className="text-2xl font-bold">B</div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="p-6">
-      <div className="flex justify-center flex-col sm:flex-row gap-8 max-w-7xl m-auto">
-        {/* Bids Table */}
+    <div className="flex flex-col  mx-auto p-10 rounded-2xl shadow-2xl ">
+      {/* Header */}
+
+      {/* Bids Table */}
+      <div className="mb-6">
         <BidsTable
-          label={"Bids"}
+          showHead
           bids={bids}
           previousBids={previousBids}
           getTrend={getTrend}
         />
+      </div>
 
-        {/* Asks Table */}
+      {/* Current Price */}
+      <div className="text-center mb-6 flex items-center justify-center">
+        <p className="text-4xl font-bold text-center text-neon-green animate-pulse">
+          ${buyPrices?.price}
+        </p>
+      </div>
+
+      {/* Asks Table */}
+      <div>
         <BidsTable
-          label={"Asks"}
           bids={asks}
           previousBids={previousAsks}
           getTrend={getTrend}

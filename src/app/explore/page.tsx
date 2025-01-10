@@ -1,4 +1,5 @@
 "use client";
+import TradeViewChart from "@/components/chart/TradeViewChart";
 import OrderBook from "@/components/orderbook/Orderbook";
 import ListItemCard from "@/components/ui/Cards/ListItemCard";
 import { Token } from "@/components/ui/Inputs/CryptoInput";
@@ -23,18 +24,23 @@ function Page() {
   };
 
   return (
-    <div className="max-w-7xl m-auto px-8 mt-5">
-      <div className="  flex  justify-center items-center flex-col-reverse sm:flex-row">
-        <div className="">
-          <div className="bg-select p-2 hover:bg-deselect border-deselect border-2 rounded-2xl">
+    <div className="max-w-7xl mx-auto px-8 mt-5  h-full flex flex-col gap-6 relative">
+      {/* Header Section */}
+      <div className="flex flex-col-reverse sm:flex-row justify-between items-center gap-4 sm:gap-6">
+        {/* Token Display */}
+        <div className="w-full sm:w-auto">
+          <div className="p-3 border border-deselect rounded-2xl bg-black/65 shadow-lg hover:shadow-neon-green/25 transition-all">
             <ListItemCard disableHover symbol={Token}></ListItemCard>
           </div>
         </div>
-        <div className="max-w-[480px] flex-grow m-auto">
+
+        {/* Search Input */}
+        <div className="w-full sm:max-w-[480px]">
           <SearchInput onClick={() => setSelectionPopup(true)}></SearchInput>
         </div>
       </div>
-      {/* Popup Modal */}
+
+      {/* Token Selector Modal */}
       <TokenSelector
         selectionPopup={selectionPopup}
         setSelectionPopup={setSelectionPopup}
@@ -42,15 +48,24 @@ function Page() {
         handleSelectToken={handleSelectToken}
       ></TokenSelector>
 
-      <OrderBook symbol={Token?.symbol}></OrderBook>
+      {/* Main Content Section */}
+      <div className="flex flex-col md:flex-row gap-8 p-6 bg-black/55 rounded-2xl shadow-2xl relative h-full sm:h-auto">
+        {/* Chart */}
+        <div className="sm:flex-grow flex-1 ">
+          <TradeViewChart chartSymbol={Token.symbol.toUpperCase()} />
+        </div>
 
-      {/* Bokeh Effect for bacground */}
-      <div className="absolute -z-20 inset-0 animate-bokeh">
-        <div className="absolute bg-green-400 opacity-20 blur-2xl rounded-full w-36 h-36 top-20 left-10 animate-pulse"></div>
-        <div className="absolute bg-green-500 opacity-25 blur-3xl rounded-full w-48 h-48 top-40 left-48"></div>
-        <div className="absolute bg-green-300 opacity-15 blur-2xl rounded-full w-64 h-64 bottom-24 right-16"></div>
-        <div className="absolute bg-green-600 opacity-10 blur-3xl rounded-full w-52 h-52 top-10 animate-pulse right-32"></div>
+        {/* Order Book */}
+        <div className="h-[10%] md:w-[30%]">
+          <OrderBook symbol={Token.symbol}></OrderBook>
+        </div>
       </div>
+
+      {/* Animated Bokeh Circles */}
+      <div className="absolute z-[-1] bg-neon-green opacity-20 blur-3xl rounded-full w-36 h-36 top-20 left-10 animate-pulse"></div>
+      <div className="absolute z-[-1] bg-neon-blue opacity-25 blur-3xl rounded-full w-48 h-48 top-40 left-48"></div>
+      <div className="absolute z-[-1] bg-neon-purple opacity-15 blur-2xl rounded-full w-64 h-64 bottom-24 right-16"></div>
+      <div className="absolute z-[-1] bg-neon-orange opacity-10 blur-3xl rounded-full w-52 h-52 top-10 animate-pulse right-32"></div>
     </div>
   );
 }

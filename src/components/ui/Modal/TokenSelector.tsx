@@ -36,7 +36,7 @@ function TokenSelector({
   );
 
   return selectionPopup ? (
-    <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-70 flex items-center justify-center animate-fadeIn">
+    <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-70 flex items-center justify-center animate-fadeIn z-50">
       <div className="bg-select rounded-3xl max-h-[80%] w-full h-full overflow-hidden sm:max-w-80  max-w-[80%] text-white animate-modalOpen border-white/10 border-2">
         <div className="flex justify-between items-center mb-4 px-6 pt-6">
           <h3 className="text-xl font-bold ">Select a token</h3>

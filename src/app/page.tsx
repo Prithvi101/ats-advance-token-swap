@@ -12,10 +12,11 @@ export default function Home() {
 
         {/* Bokeh Effect for bacground */}
         <div className="absolute -z-20 inset-0 animate-bokeh">
-          <div className="absolute bg-green-400 opacity-20 blur-2xl rounded-full w-36 h-36 top-20 left-10 animate-pulse"></div>
-          <div className="absolute bg-green-500 opacity-25 blur-3xl rounded-full w-48 h-48 top-40 left-48"></div>
-          <div className="absolute bg-green-300 opacity-15 blur-2xl rounded-full w-64 h-64 bottom-24 right-16"></div>
-          <div className="absolute bg-green-600 opacity-10 blur-3xl rounded-full w-52 h-52 top-10 animate-pulse right-32"></div>
+          {/* Animated Bokeh Circles */}
+          <div className="absolute z-[-1] bg-neon-green opacity-20 blur-3xl rounded-full w-36 h-36 top-20 left-10 animate-pulse"></div>
+          <div className="absolute z-[-1] bg-neon-blue opacity-25 blur-3xl rounded-full w-48 h-48 top-40 left-48"></div>
+          <div className="absolute z-[-1] bg-neon-purple opacity-15 blur-2xl rounded-full w-64 h-64 bottom-24 right-16"></div>
+          <div className="absolute z-[-1] bg-neon-orange opacity-10 blur-3xl rounded-full w-52 h-52 top-10 animate-pulse right-32"></div>
         </div>
       </main>
     </div>
